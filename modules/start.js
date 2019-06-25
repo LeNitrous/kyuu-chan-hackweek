@@ -1,5 +1,4 @@
 const { Mal } = require('node-myanimelist');
-const Enmap = require('enmap');
 const Promise = require('bluebird');
 const youtubeDownload = require('ytdl-core-discord');
 const youtubeSearchApi = require('simple-youtube-api');
@@ -32,30 +31,31 @@ class GameManager {
         this.voiceChannel = options.voiceChannel;
         this.textChannel = options.textChannel;
         this.searchApi = new youtubeSearchApi(options.token);
-        this.scores = new Enmap();
-        this.rounds = new Enmap();
+        this.scores = {};
+        this.rounds = [];
         this.connection = undefined;
         this.animeList = options.list
 
         this.tvSizePlaytime = 90;
         this.roundLength = options.roundLength || 20;
         this.roundsMax = options.roundsMax || 5;
-        this.currentRound = 1;
+        this.currentRound = 0;
     }
 
     async init() {
         this.connection = await this.voiceChannel.join();
-        this.rounds.set(this.currentRound, await this.getRandomAnime());
+        this.rounds[this.currentRound] = await this.getRandomAnime();
         await this.start();
     } 
 
     async start() {
+        this.currentRound++;
         console.log(`::start() -> Started round ${this.currentRound}`);
 
         if (this.currentRound <= this.roundsMax)
-            this.rounds.set(this.currentRound + 1, await this.getRandomAnime());
+            this.rounds[this.currentRound + 1] = await this.getRandomAnime();
         
-        var round = this.rounds.get(this.currentRound);
+        var round = this.rounds[this.currentRound];
         var answers = this.getPossibleAnswers(round.anime);
         var answerers = [];
 
@@ -67,10 +67,10 @@ class GameManager {
             if (answerers.includes(author))
                 return;
 
-            if (!this.scores.has(author))
-                this.scores.set(author, 1);
+            if (!this.scores[author])
+                this.scores[author] = 1;
             else
-                this.scores.set(author, this.scores.get(author) + 1);
+                this.scores[author] += 1;
 
             answerers.push(author);
         });
@@ -90,13 +90,13 @@ class GameManager {
             };
 
             await this.textChannel.send("And the answer is...", { embed });
-            await this.textChannel.send(`${(answerers.length > 0) ? answerers.map(id => `<#${id}>`).join(', ') : "Nobody"} got the correct answer!`);
+            await this.textChannel.send(`${(answerers.length > 0) ? answerers.map(id => `<@${id}>`).join(', ') : "Nobody"} got the correct answer!`);
             await Promise.delay(5000);
 
             if (this.currentRound < this.roundsMax)
-                return await this.finish();
-            else
                 return await this.start();
+            else
+                return await this.finish();
         });
 
         this.textChannel.send(`**Round #${this.currentRound}!**`);
@@ -114,7 +114,12 @@ class GameManager {
         var anime = this.animeList[getRandomInt(0, this.animeList.length - 1)];
         var data = await Mal.anime(anime.mal_id);
 
-        var query = await this.searchApi.searchVideos(this.getSearchQuery(data), 1);
+        //var query = await this.searchApi.searchVideos(this.getSearchQuery(data), 1);
+        var query = [
+            {
+                shortURL: "https://www.youtube.com/watch?v=pLQGfSQUuCM"
+            }
+        ];
 
         if (query.length < 1)
             return await this.getRandomAnime();
