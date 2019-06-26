@@ -47,7 +47,7 @@ class GameManager {
 
     async init() {
         this.connection = await this.voiceChannel.join();
-        this.rounds[this.currentRound] = await this.getRandomAnime();
+        this.rounds[1] = await this.getRandomAnime();
         await this.start();
     } 
 
