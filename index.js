@@ -24,8 +24,8 @@ client.on('message', (message) => {
         if (!command)
             return;
 
-        //if (command.admin && !message.member.roles.has(client.config.bot_adminRole))
-        //    return;
+        if (command.admin && !message.member.roles.find(role => role.name == client.config.bot_adminRole))
+            return;
 
         console.log(`[${message.guild.id}] ${message.author.username}#${message.author.discriminator}: ${cmd}`);
 

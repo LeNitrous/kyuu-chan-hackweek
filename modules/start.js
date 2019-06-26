@@ -91,7 +91,9 @@ class GameManager {
 
             await this.textChannel.send("And the answer is...", { embed });
             await this.textChannel.send(`${(answerers.length > 0) ? answerers.map(id => `<@${id}>`).join(', ') : "Nobody"} got the correct answer!`);
-            await Promise.delay(5000);
+            await Promise.delay(1000);
+            await this.textChannel.send(`__Round #${this.currentRound} Leaders:__\n${this.formatLeaderboard(5).join('\n')}`);
+            await Promise.delay(6000);
 
             if (this.currentRound < this.roundsMax)
                 return await this.start();
@@ -106,7 +108,9 @@ class GameManager {
     async finish() {
         console.log(`::finish() -> Game ended.`);
 
-        this.textChannel.send("The game has ended! Thank you for playing.");
+        await this.textChannel.send("__Post-Game Results!__");
+        await this.textChannel.send(`${this.formatLeaderboard().join('\n')}`);
+        await this.textChannel.send(`Congratulations <@${sortProperties(this.scores)[0][0]}>, you won!`);
         this.voiceChannel.leave();
     }
 
@@ -144,7 +148,7 @@ class GameManager {
         var dispatcher = await this.voiceChannel.connection.playOpusStream(track, options);
         dispatcher.on('start', async () => {
             await Promise.delay(this.roundLength * 1000);
-            dispatcher.pause();
+            dispatcher.end();
         });
     }
 
@@ -168,6 +172,22 @@ class GameManager {
     
         return themes[getRandomInt(0, themes.length - 1)];
     }
+
+    formatLeaderboard(length) {
+        var sorted = sortProperties(this.scores);
+
+        if (length)
+            sorted = sorted.slice(0, length - 1);
+        
+        return sorted.map(this.formatLeaderboardEntry)
+    }
+
+    formatLeaderboardEntry(entry, index) {
+        var member = this.textChannel.guild.members.get(entry[0]);
+        var name = member.nickname || member.user.username;
+        
+        return `:black_small_square: ${(index == 0) ? "**" : ""}${name} (${entry[1]} points)${(index == 0) ? "**" : ""}`;
+    }
 }
 
 function getRandomInt(min, max) {
@@ -175,4 +195,19 @@ function getRandomInt(min, max) {
     max = Math.floor(max);
 
     return Math.floor(Math.random() * (max - min)) + min;
+}
+
+// Source: https://gist.github.com/umidjons/9614157
+function sortProperties(obj) {
+    var sortable = [];
+    
+	for (var key in obj)
+		if(obj.hasOwnProperty(key))
+            sortable.push([key, obj[key]]);
+            
+    sortable.sort(function(a, b) {
+        return a[1] - b[1];
+    });
+
+	return sortable;
 }
