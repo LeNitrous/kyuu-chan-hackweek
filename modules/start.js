@@ -179,7 +179,7 @@ class GameManager {
         if (length)
             sorted = sorted.slice(0, length - 1);
         
-        return sorted.map(this.formatLeaderboardEntry)
+        return sorted.map((entry, index) => this.formatLeaderboardEntry(entry, index));
     }
 
     formatLeaderboardEntry(entry, index) {
