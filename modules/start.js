@@ -17,6 +17,8 @@ exports.run = async (client, message) => {
         textChannel: message.guild.channels.get(setting._quizTextChannel),
         token: client.config.google_token,
         debug: client.development,
+        animeYear: setting.quizAnimeYear,
+        animeSeason: setting.quizAnimeSeason,
         roundsMax: setting.quizRounds,
         roundLength: setting.quizRoundLength,
         client: client,

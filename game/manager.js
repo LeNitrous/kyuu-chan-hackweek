@@ -15,8 +15,8 @@ class GameManager {
         this.collector = undefined;
 
         this.tvSizePlaytime = 90;
-        this.quizAnimeYear = options.quizAnimeYear || "";
-        this.quizAnimeSeason = options.quizAnimeSeason || "";
+        this.animeYear = options.animeYear || "";
+        this.animeSeason = options.animeSeason || "";
         this.roundLength = options.roundLength || 20;
         this.roundsMax = options.roundsMax || 5;
         this.currentRound = 0;
@@ -27,7 +27,7 @@ class GameManager {
     }
 
     async init(startGame = true) {
-        var season = (!this.debug) ? await Mal.season(this.quizAnimeYear, this.quizAnimeSeason) :
+        var season = (!this.debug) ? await Mal.season(this.animeYear, this.animeSeason) :
             require('../test/season.json');
         this.animeList = season.anime.filter(show => show.type == "TV" && show.kids == false && show.members > 900);
         
