@@ -9,6 +9,19 @@ client.modules = new Enmap();
 client.setting = new Enmap('guilds');
 client.development = process.env.NODE_ENV == 'dev';
 
+client.defaults = {};
+client.defaults.guildSettings = {
+    _quizTextChannel: undefined,
+    _quizVoiceChannel: undefined,
+    _quizIsActive: false,
+    quizAnimeYear: 2019,
+    quizAnimeSeason: 'winter',
+    quizRounds: 10,
+    quizRoundLength: 20
+};
+
+client.activeGames = {}
+
 client.on('ready', () => console.log(`The bot is now ready! ${(client.development) ? "and is running in developer mode." : ""}`));
 client.on('message', (message) => {
     (async () => {
@@ -39,13 +52,7 @@ client.on('guildCreate', (guild) => {
 
     console.log(`Joined new guild ${guild.name} (${guild.id}).`);
 
-    client.setting.set(guild.id, {
-        quizTextChannel: undefined,
-        quizVoiceChannel: undefined,
-        quizAnimeYear: 2019,
-        quizAnimeSeason: 'winter',
-        quizRounds: 10
-    });
+    client.setting.ensure(guild.id, client.defaults.guildSettings);
 });
 
 (async () => {

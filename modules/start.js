@@ -6,26 +6,33 @@ const youtubeSearchApi = require('simple-youtube-api');
 exports.run = async (client, message) => {
     const setting = client.setting.get(message.guild.id);
 
-    if (!message.guild.channels.has(setting.quizVoiceChannel) || !message.guild.channels.has(setting.quizTextChannel))
+    if (!message.guild.channels.has(setting._quizVoiceChannel) || !message.guild.channels.has(setting._quizTextChannel))
         return message.channel.send("Cannot start a game. Please setup your channels first.");
 
-    if (message.channel.id !== setting.quizTextChannel)
-        return message.channel.send(`Can only start the game in <#${setting.quizTextChannel}>! Use the command there again.`);
+    if (setting._quizIsActive)
+        return message.channel.send("Cannot start a game while there is one currently active.");
 
-    var season = (!client.development) ? await Mal.season(setting.animeYear, setting.animeSeason) :
+    if (message.channel.id !== setting._quizTextChannel)
+        return message.channel.send(`Can only start the game in <#${setting._quizTextChannel}>! Use the command there again.`);
+
+    var season = (!client.development) ? await Mal.season(setting.quizAnimeYear, setting.quizAnimeSeason) :
         require('../test/season.json');
 
     var options = {
-        voiceChannel: message.guild.channels.get(setting.quizVoiceChannel),
-        textChannel: message.guild.channels.get(setting.quizTextChannel),
+        voiceChannel: message.guild.channels.get(setting._quizVoiceChannel),
+        textChannel: message.guild.channels.get(setting._quizTextChannel),
         list: season.anime.filter(show => show.type == "TV" && show.kids == false),
         token: client.config.google_token,
-        debug: client.development
+        debug: client.development,
+        roundsMax: setting.quizRounds,
+        roundLength: setting.quizRoundLength,
+        client: client,
+        message: message
     }
 
-    var manager = new GameManager(options);
+    client.activeGames[message.guild.id] = new GameManager(options);
 
-    await manager.init();
+    await client.activeGames[message.guild.id].init();
 }
 
 class GameManager {
@@ -43,10 +50,13 @@ class GameManager {
         this.roundsMax = options.roundsMax || 5;
         this.currentRound = 0;
 
+        this.client = undefined || options.client;
+        this.message = undefined || options.message;
         this.debug = options.debug || false;
     }
 
     async init() {
+        this.client.setting.set(this.message.guild.id, true, "_quizIsActive");
         this.connection = await this.voiceChannel.join();
         this.rounds[1] = await this.getRandomAnime();
         await this.start();
@@ -56,7 +66,7 @@ class GameManager {
         this.currentRound++;
         console.log(`::start() -> Started round ${this.currentRound}`);
 
-        if (this.currentRound <= this.roundsMax)
+        if (this.currentRound < this.roundsMax)
             this.rounds[this.currentRound + 1] = await this.getRandomAnime();
         
         var round = this.rounds[this.currentRound];
@@ -97,10 +107,11 @@ class GameManager {
             await this.textChannel.send(`${(answerers.length > 0) ? answerers.map(id => `<@${id}>`).join(', ') : "Nobody"} got the correct answer!`);
             await Promise.delay(1000);
             await this.textChannel.send(`__Round #${this.currentRound} Leaders:__\n${this.formatLeaderboard(5).join('\n')}`);
+            await this.playTrack(round.track, 6);
             await Promise.delay(6000);
 
             if (this.currentRound < this.roundsMax)
-                return await this.start();
+                return await this.start();  
             else
                 return await this.finish();
         });
@@ -113,9 +124,22 @@ class GameManager {
         console.log(`::finish() -> Game ended.`);
 
         await this.textChannel.send("__Post-Game Results!__");
-        await this.textChannel.send(`${this.formatLeaderboard().join('\n')}`);
-        await this.textChannel.send(`Congratulations <@${sortProperties(this.scores)[0][0]}>, you won!`);
-        this.voiceChannel.leave();
+        if (Object.keys(this.scores).length > 0) {
+            await this.textChannel.send(`${this.formatLeaderboard().join('\n')}`);
+            await this.textChannel.send(`Congratulations <@${sortProperties(this.scores)[0][0]}>, you won!`);
+        }
+        else
+            await this.textChannel.send("Nobody won. Better luck next time!");
+        
+        this.cleanup();
+    }
+
+    async end() {
+        console.log(`::end() -> Game forcibly ended.`);
+
+        await this.textChannel.send("The game has been aborted.");
+
+        this.cleanup();
     }
 
     async getRandomAnime() {
@@ -139,6 +163,19 @@ class GameManager {
         };
     }
 
+    async playTrack(track, length) {
+        var options = {
+            seek: this.tvSizePlaytime - 30,
+            bitrate: 'auto'
+        }
+    
+        var dispatcher = await this.voiceChannel.connection.playOpusStream(track, options);
+        dispatcher.on('start', async () => {
+            await Promise.delay(length * 1000);
+            dispatcher.end();
+        });
+    }
+
     async playTrackPreview(track) {
         var options = {
             seek: getRandomInt(0, this.tvSizePlaytime - this.roundLength),
@@ -150,6 +187,12 @@ class GameManager {
             await Promise.delay(this.roundLength * 1000);
             dispatcher.end();
         });
+    }
+
+    cleanup() {
+        this.client.setting.set(this.message.guild.id, false, "_quizIsActive");
+        delete this.client.activeGames[this.message.guild.id];
+        this.voiceChannel.leave();
     }
 
     getPossibleAnswers(anime) {
