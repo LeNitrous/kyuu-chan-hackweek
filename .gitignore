@@ -7,6 +7,8 @@ test.mp3
 data/
 test/
 modules/test.js
+modules/reload.js
+modules/eval.js
 
 # Logs
 logs
