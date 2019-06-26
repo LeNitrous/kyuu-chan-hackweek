@@ -1,5 +1,4 @@
 module.exports = {
-    admin: true,
     run: async (client, message, args) => {
         const setting = client.setting.get(message.guild.id);
 

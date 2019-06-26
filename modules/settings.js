@@ -1,5 +1,4 @@
 module.exports = {
-    admin: true,
     run: (client, message, args) => {
         var settings = client.setting.get(message.guild.id);
         var keys = {

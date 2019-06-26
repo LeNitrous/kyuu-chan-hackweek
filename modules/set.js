@@ -1,5 +1,4 @@
 module.exports = {
-    admin: true,
     run: (client, message, args) => {
         const keys = {
             "season": "",
