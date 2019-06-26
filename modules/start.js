@@ -18,7 +18,8 @@ exports.run = async (client, message) => {
         voiceChannel: message.guild.channels.get(setting.quizVoiceChannel),
         textChannel: message.guild.channels.get(setting.quizTextChannel),
         list: season.anime.filter(show => show.type == "TV" && show.kids == false),
-        token: client.config.google_token
+        token: client.config.google_token,
+        debug: client.development
     }
 
     var manager = new GameManager(options);
@@ -40,6 +41,8 @@ class GameManager {
         this.roundLength = options.roundLength || 20;
         this.roundsMax = options.roundsMax || 5;
         this.currentRound = 0;
+
+        this.debug = options.debug || false;
     }
 
     async init() {
@@ -118,12 +121,8 @@ class GameManager {
         var anime = this.animeList[getRandomInt(0, this.animeList.length - 1)];
         var data = await Mal.anime(anime.mal_id);
 
-        //var query = await this.searchApi.searchVideos(this.getSearchQuery(data), 1);
-        var query = [
-            {
-                shortURL: "https://www.youtube.com/watch?v=pLQGfSQUuCM"
-            }
-        ];
+        var query = (!this.debug) ? await this.searchApi.searchVideos(this.getSearchQuery(data), 1) :
+            [{ shortURL: "https://www.youtube.com/watch?v=pLQGfSQUuCM" }];
 
         if (query.length < 1)
             return await this.getRandomAnime();

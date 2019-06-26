@@ -7,8 +7,9 @@ const client = new Discord.Client();
 client.config = require('./config.json');
 client.modules = new Enmap();
 client.setting = new Enmap('guilds');
+client.development = process.env.NODE_ENV == 'dev';
 
-client.on('ready', () => console.log("Bot is now ready!"));
+client.on('ready', () => console.log(`The bot is now ready! ${(client.development) ? "and is running in developer mode." : ""}`));
 client.on('message', (message) => {
     (async () => {
         if (message.author.bot)

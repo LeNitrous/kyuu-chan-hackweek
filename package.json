@@ -4,7 +4,8 @@
   "description": "The Discord Bot that replicates the AMQ experience!",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start-dev": "cross-env NODE_ENV=dev node index",
+    "start": "node index"
   },
   "keywords": [
     "anime",
@@ -25,5 +26,8 @@
     "node-opus": "^0.3.2",
     "simple-youtube-api": "^5.2.0",
     "ytdl-core-discord": "^1.0.3"
+  },
+  "devDependencies": {
+    "cross-env": "^5.2.0"
   }
 }
