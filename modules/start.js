@@ -21,7 +21,7 @@ exports.run = async (client, message) => {
     var options = {
         voiceChannel: message.guild.channels.get(setting._quizVoiceChannel),
         textChannel: message.guild.channels.get(setting._quizTextChannel),
-        list: season.anime.filter(show => show.type == "TV" && show.kids == false),
+        list: season.anime.filter(show => show.type == "TV" && show.kids == false && show.members > 900),
         token: client.config.google_token,
         debug: client.development,
         roundsMax: setting.quizRounds,
@@ -210,10 +210,14 @@ class GameManager {
     }
 
     getSearchQuery(anime) {
+        /*
         const types = [ "opening_themes", "ending_themes" ];
         const themes = anime[types[getRandomInt(0, 1)]];
     
         return themes[getRandomInt(0, themes.length - 1)];
+        */
+        const type = [ "op", "ed" ];
+        return anime.title + " " + type[getRandomInt(0, 1)];
     }
 
     formatLeaderboard(length) {
