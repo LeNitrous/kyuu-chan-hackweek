@@ -55,6 +55,12 @@ client.on('guildCreate', (guild) => {
     client.setting.ensure(guild.id, client.defaults.guildSettings);
 });
 
+process.on('SIGINT', async () => {
+    console.log("Shutting down...");
+    await client.destroy();
+    process.exit(0);
+});
+
 (async () => {
     var modules = await fs.readdir('./modules');
     modules.forEach(file => {
