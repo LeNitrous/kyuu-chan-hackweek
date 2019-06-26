@@ -2,6 +2,7 @@ const { Mal } = require('node-myanimelist');
 const Promise = require('bluebird');
 const youtubeDownload = require('ytdl-core-discord');
 const youtubeSearchApi = require('simple-youtube-api');
+const similarity = require('string-similarity');
 
 class GameManager {
     constructor(options = {}) {
@@ -51,7 +52,7 @@ class GameManager {
         var answers = this.getPossibleAnswers(round.anime);
         var answerers = [];
 
-        const filter = msg => answers.includes(msg.content.trim().toLowerCase());
+        const filter = msg => this.processAnswer(answers, msg);
         this.collector = this.textChannel.createMessageCollector(filter, { time: (this.roundLength + 5) * 1000 });
         this.collector.on('collect', msg => {
             var author = msg.author.id;
@@ -67,7 +68,7 @@ class GameManager {
             answerers.push(author);
         });
         this.collector.on('end', async(_, reason) => {
-            if (reason == "forced")
+            if (reason == "force")
                 return;
 
             const embed = {
@@ -177,6 +178,19 @@ class GameManager {
         this.voiceChannel.leave();
     }
 
+    processAnswer(ans, msg) {
+        var score = 0;
+
+        msg = msg.content.trim().replace(/[^\w\s]/gi, '').toLowerCase();
+        ans.forEach(answer => {
+            var similarityScore = similarity.compareTwoStrings(answer, msg);
+
+            score = (similarityScore > score) ? similarityScore : score;
+        });
+
+        return score > 0.45;
+    }
+
     getPossibleAnswers(anime) {
         var answers = [];
         [
@@ -188,7 +202,7 @@ class GameManager {
                 answers.push(anime[prop]);
         });
 
-        return answers.concat(anime.title_synonyms).map((a) => a.toLowerCase());
+        return answers.concat(anime.title_synonyms).map((a) => a.replace(/[^\w\s]/gi, '').toLowerCase());
     }
 
     getSearchQuery(anime) {
