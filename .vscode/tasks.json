@@ -7,6 +7,16 @@
             "type": "npm",
             "script": "install",
             "problemMatcher": []
+        },
+        {
+            "type": "npm",
+            "script": "start",
+            "problemMatcher": []
+        },
+        {
+            "type": "npm",
+            "script": "start-dev",
+            "problemMatcher": []
         }
     ]
 }
