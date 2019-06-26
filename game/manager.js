@@ -110,7 +110,7 @@ class GameManager {
         await this.textChannel.send("__Post-Game Results!__");
         if (Object.keys(this.scores).length > 0) {
             await this.textChannel.send(`${this.formatLeaderboard().join('\n')}`);
-            await this.textChannel.send(`Congratulations <@${sortProperties(this.scores)[0][0]}>, you won!`);
+            await this.textChannel.send(`Congratulations <@${sortProperties(this.scores).reverse()[0][0]}>, you won!`);
         }
         else
             await this.textChannel.send("Nobody won. Better luck next time!");
@@ -219,10 +219,10 @@ class GameManager {
     }
 
     formatLeaderboard(length) {
-        var sorted = sortProperties(this.scores);
+        var sorted = sortProperties(this.scores).reverse();
 
         if (length)
-            sorted = sorted.slice(0, length - 1);
+            sorted = sorted.slice(0, length);
         
         return sorted.map((entry, index) => this.formatLeaderboardEntry(entry, index));
     }
