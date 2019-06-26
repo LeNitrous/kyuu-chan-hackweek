@@ -12,7 +12,8 @@ exports.run = async (client, message) => {
     if (message.channel.id !== setting.quizTextChannel)
         return message.channel.send(`Can only start the game in <#${setting.quizTextChannel}>! Use the command there again.`);
 
-    var season = require('../test/season.json'); // await Mal.season(setting.animeYear, setting.animeSeason);
+    var season = (!client.development) ? await Mal.season(setting.animeYear, setting.animeSeason) :
+        require('../test/season.json');
 
     var options = {
         voiceChannel: message.guild.channels.get(setting.quizVoiceChannel),
