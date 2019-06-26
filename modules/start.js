@@ -21,6 +21,7 @@ exports.run = async (client, message) => {
         animeSeason: setting.quizAnimeSeason,
         roundsMax: setting.quizRounds,
         roundLength: setting.quizRoundLength,
+        allowDupes: setting.quizAllowDupes,
         client: client,
         message: message
     }

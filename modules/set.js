@@ -2,8 +2,9 @@ module.exports = {
     run: (client, message, args) => {
         const keys = {
             "season": "",
+            "dupes": "",
             "rounds": "quizRounds",
-            "timer": "quizRoundLength",
+            "timer": "quizRoundLength"
         };
 
         var prop = args.shift();
@@ -27,6 +28,13 @@ module.exports = {
 
         if (prop == "timer" && isNaN(val))
             return message.channel.send("Key `timer` requires a number.");
+
+        if (prop == "dupes" && !/(true|false)/i.test(val))
+            return message.channel.send("Key `dupes` requires a boolean.");
+        else if (prop == "dupes") {
+            client.setting.set(message.guild.id, val === "true", "quizAllowDupes");
+            return message.channel.send(`\`dupes\` has been set to \`${val}\``);
+        }
 
         client.setting.set(message.guild.id, val, keys[prop]);
         message.channel.send(`\`${prop}\` has been set to \`${val}\`.`);

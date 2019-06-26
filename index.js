@@ -16,6 +16,7 @@ client.defaults.guildSettings = {
     _quizIsActive: false,
     quizAnimeYear: 2019,
     quizAnimeSeason: 'winter',
+    quizAllowDupes: false,
     quizRounds: 10,
     quizRoundLength: 20
 };

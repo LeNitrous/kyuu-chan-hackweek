@@ -11,6 +11,7 @@ class GameManager {
         this.searchApi = new youtubeSearchApi(options.token || "");
         this.scores = {};
         this.rounds = [];
+        this.played = [];
         this.connection = undefined;
         this.animeList = undefined;
         this.collector = undefined;
@@ -20,6 +21,7 @@ class GameManager {
         this.animeSeason = options.animeSeason || "";
         this.roundLength = options.roundLength || 20;
         this.roundsMax = options.roundsMax || 5;
+        this.allowDupes = options.allowDupes || false;
         this.currentRound = 0;
 
         this.client = undefined || options.client;
@@ -127,6 +129,12 @@ class GameManager {
 
     async getRandomAnime() {
         var anime = this.animeList[getRandomInt(0, this.animeList.length - 1)];
+
+        if (this.played.includes(anime.title))
+            return await this.getRandomAnime();
+
+        this.played.push(anime.title);
+
         var data = await Mal.anime(anime.mal_id);
 
         var query = (!this.debug) ? await this.searchApi.searchVideos(this.getSearchQuery(data), 1) :
