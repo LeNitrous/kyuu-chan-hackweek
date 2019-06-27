@@ -28,6 +28,8 @@ module.exports = {
 
         if (prop == "timer" && isNaN(val))
             return message.channel.send("Key `timer` requires a number.");
+        else if (prop == "timer" && Number(val) > 20)
+            return message.channel.send("Key `timer` cannot be greater than 20 seconds");
 
         if (prop == "dupes" && !/(true|false)/i.test(val))
             return message.channel.send("Key `dupes` requires a boolean.");

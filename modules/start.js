@@ -1,4 +1,5 @@
 const GameManager = require('../game/manager');
+const Promise = require('bluebird');
 
 exports.run = async (client, message) => {
     const setting = client.setting.get(message.guild.id);
@@ -28,5 +29,7 @@ exports.run = async (client, message) => {
 
     client.activeGames[message.guild.id] = new GameManager(options);
 
+    await message.channel.send("Starting a game in 5 seconds!");
+    await Promise.delay(5000);
     await client.activeGames[message.guild.id].init();
 }

@@ -101,7 +101,7 @@ class GameManager {
         });
 
         this.textChannel.send(`**Round #${this.currentRound}!**`);
-        await this.playTrackPreview(round.track);
+        await this.playTrack(round.track, this.roundLength);
     }
 
     async finish() {
@@ -156,26 +156,12 @@ class GameManager {
 
     async playTrack(track, length) {
         var options = {
-            seek: this.tvSizePlaytime - 30,
             bitrate: 'auto'
         }
     
         var dispatcher = await this.voiceChannel.connection.playOpusStream(track, options);
         dispatcher.on('start', async () => {
             await Promise.delay(length * 1000);
-            dispatcher.end();
-        });
-    }
-
-    async playTrackPreview(track) {
-        var options = {
-            seek: getRandomInt(0, this.tvSizePlaytime - this.roundLength),
-            bitrate: 'auto'
-        }
-    
-        var dispatcher = await this.voiceChannel.connection.playOpusStream(track, options);
-        dispatcher.on('start', async () => {
-            await Promise.delay(this.roundLength * 1000);
             dispatcher.end();
         });
     }

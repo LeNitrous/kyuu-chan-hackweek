@@ -23,7 +23,12 @@ client.defaults.guildSettings = {
 
 client.activeGames = {}
 
-client.on('ready', () => console.log(`The bot is now ready! ${(client.development) ? "and is running in developer mode." : ""}`));
+client.on('ready', () => {
+    for (var guild in client.setting.keys())
+        client.setting.set(guild, false, "_quizIsActive");
+
+    console.log(`The bot is now ready! ${(client.development) ? "and is running in developer mode." : ""}`);
+});
 client.on('message', (message) => {
     (async () => {
         if (message.author.bot)
