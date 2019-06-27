@@ -8,6 +8,7 @@ class GameManager {
     constructor(options = {}) {
         this.voiceChannel = options.voiceChannel;
         this.textChannel = options.textChannel;
+        this.host = options.host;
         this.searchApi = new youtubeSearchApi(options.token || "");
         this.scores = {};
         this.rounds = [];

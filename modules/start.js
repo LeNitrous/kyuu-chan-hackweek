@@ -16,6 +16,7 @@ exports.run = async (client, message) => {
     var options = {
         voiceChannel: message.guild.channels.get(setting._quizVoiceChannel),
         textChannel: message.guild.channels.get(setting._quizTextChannel),
+        host: message.member,
         token: client.config.google_token,
         debug: client.development,
         animeYear: setting.quizAnimeYear,
@@ -29,7 +30,7 @@ exports.run = async (client, message) => {
 
     client.activeGames[message.guild.id] = new GameManager(options);
 
-    await message.channel.send("Starting a game in 5 seconds!");
+    await message.channel.send(`Starting a game hosted by <@${message.member.id}> in 5 seconds!`);
     await Promise.delay(5000);
     await client.activeGames[message.guild.id].init();
 }
