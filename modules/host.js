@@ -1,4 +1,4 @@
-exports.run = async (client) => {
+exports.run = async (client, message) => {
     const setting = client.setting.get(message.guild.id);
 
     if (!setting._quizIsActive)
