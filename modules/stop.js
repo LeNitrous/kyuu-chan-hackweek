@@ -8,8 +8,8 @@ module.exports = {
         if (message.channel.id !== setting._quizTextChannel)
             return message.channel.send(`Can only end the game in <#${setting._quizTextChannel}>! Use the command there again.`);
 
-        if (client.activeGames[message.guild.id].host.id !== message.member.id)
-            return message.channel.send("Only the host can stop this game.");
+        if (client.activeGames[message.guild.id].host.id !== message.member.id || !message.member.roles.find(role => role.name == client.config.bot_adminRole))
+            return message.channel.send("Only the host or admin can stop this game.");
 
         await client.activeGames[message.guild.id].end();
     }
